@@ -1,13 +1,13 @@
 {
-  "name": "code-atlas-ai",
+  "name": "ai-code-atlas",
   "version": "0.1.0",
   "description": "Smart codebase architectural map generator for AI coding agents. Compress repos by 95%+ into high-density semantic context.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "bin": {
-    "code-atlas": "dist/cli.js",
-    "code-atlas-ai": "dist/cli.js"
+    "ai-code-atlas": "dist/cli.js",
+    "code-atlas": "dist/cli.js"
   },
   "scripts": {
     "build": "tsup",

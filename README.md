@@ -1,9 +1,9 @@
-# 🧭 Code Atlas (`code-atlas-ai`)
+# 🧭 Code Atlas (`ai-code-atlas`)
 
 > **Smart Codebase Architectural Map Generator for AI Coding Agents.**  
 > *Compress entire repositories by 90–95%+ into high-density semantic maps. Give Cursor, Claude Code, Windsurf, Copilot, and Aider surgical precision without burning your token budget.*
 
-[![npm version](https://img.shields.io/npm/v/code-atlas-ai.svg?color=cb3837&style=flat-square)](https://www.npmjs.com/package/code-atlas-ai)
+[![npm version](https://img.shields.io/npm/v/ai-code-atlas.svg?color=cb3837&style=flat-square)](https://www.npmjs.com/package/ai-code-atlas)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![Node: >=18](https://img.shields.io/badge/Node-%3E%3D18-brightgreen.svg?style=flat-square)](https://nodejs.org/)
 [![Tests](https://img.shields.io/badge/Tests-100%25%20Passing-success.svg?style=flat-square)](https://github.com/hsnacar/code-atlas)
@@ -69,7 +69,7 @@ Run directly in any project root with `npx` (no install required):
 
 ```bash
 # Generate AGENT_MAP.md in the current directory
-npx code-atlas-ai
+npx ai-code-atlas
 ```
 
 ### 🎯 1. Task Pinpointer Mode (Recommended for AI Prompts)
@@ -77,7 +77,7 @@ npx code-atlas-ai
 When you're about to ask an AI agent to solve a specific task, run:
 
 ```bash
-npx code-atlas-ai --focus "client login jwt token"
+npx ai-code-atlas --focus "client login jwt token"
 ```
 
 This places a prominent **`🎯 Task Focus Targets`** section at the very top of the map, pinpointing the exact target files and symbols responsible for that feature.
@@ -87,7 +87,7 @@ This places a prominent **`🎯 Task Focus Targets`** section at the very top of
 For larger projects where you want single-line file summaries:
 
 ```bash
-npx code-atlas-ai --compact
+npx ai-code-atlas --compact
 ```
 
 ### 📊 3. Visual Architecture Diagram
@@ -95,7 +95,7 @@ npx code-atlas-ai --compact
 Generate an interactive Mermaid diagram inside your map:
 
 ```bash
-npx code-atlas-ai --diagram
+npx ai-code-atlas --diagram
 ```
 
 ### 💰 4. Token Budget Cap (For Large Repos & Monorepos)
@@ -103,7 +103,7 @@ npx code-atlas-ai --diagram
 Guarantee your map never exceeds a given token limit:
 
 ```bash
-npx code-atlas-ai --budget 8000
+npx ai-code-atlas --budget 8000
 ```
 
 ---
@@ -170,7 +170,7 @@ Add this to your project's `CLAUDE.md`:
 ```markdown
 # Codebase Orientation
 Refer to `AGENT_MAP.md` for the architectural structure and module symbols.
-To refresh the map for a task: `npx code-atlas-ai --focus "<task>"`
+To refresh the map for a task: `npx ai-code-atlas --focus "<task>"`
 ```
 
 ### 3. In Windsurf (`.windsurfrules`)
@@ -182,10 +182,10 @@ Check `AGENT_MAP.md` before navigating the codebase to minimize token usage and 
 Copy the focused map directly to your clipboard:
 ```bash
 # macOS
-npx code-atlas-ai --focus "checkout payment" --stdout | pbcopy
+npx ai-code-atlas --focus "checkout payment" --stdout | pbcopy
 
 # Linux
-npx code-atlas-ai --focus "checkout payment" --stdout | xclip -selection clipboard
+npx ai-code-atlas --focus "checkout payment" --stdout | xclip -selection clipboard
 ```
 
 ---
@@ -209,10 +209,10 @@ npx code-atlas-ai --focus "checkout payment" --stdout | xclip -selection clipboa
 
 ## 💻 Programmatic SDK Usage
 
-You can also use `code-atlas-ai` inside your own Node.js / TypeScript scripts or tools:
+You can also use `ai-code-atlas` inside your own Node.js / TypeScript scripts or tools:
 
 ```typescript
-import { generateAtlas } from 'code-atlas-ai';
+import { generateAtlas } from 'ai-code-atlas';
 
 const { map, output, focusMatches } = generateAtlas({
   cwd: './my-project',
