@@ -68,6 +68,7 @@ type AtlasMap struct {
 var defaultIgnores = map[string]bool{
 	".git":              true,
 	".svn":              true,
+	".hg":               true,
 	"node_modules":      true,
 	"dist":              true,
 	"build":             true,
@@ -79,6 +80,8 @@ var defaultIgnores = map[string]bool{
 	"coverage":          true,
 	".next":             true,
 	".nuxt":             true,
+	".turbo":            true,
+	".cache":            true,
 	"vendor":            true,
 	"package-lock.json": true,
 	"yarn.lock":         true,
@@ -94,8 +97,12 @@ var codeExtensions = map[string]bool{
 	".rb": true,
 	".php": true,
 	".cs": true,
-	".c": true, ".cpp": true, ".h": true, ".hpp": true,
-	".json": true, ".yaml": true, ".yml": true,
+	".c": true, ".cpp": true, ".cc": true, ".cxx": true, ".h": true, ".hpp": true,
+	".swift": true, ".kt": true, ".kts": true,
+	".scala": true,
+	".sql": true,
+	".sh": true, ".bash": true, ".zsh": true,
+	".json": true, ".yaml": true, ".yml": true, ".toml": true,
 }
 
 func main() {
@@ -293,9 +300,16 @@ func scanRepository(rootDir string, maxFiles int) ([]string, error) {
 		rel = filepath.ToSlash(rel)
 		base := info.Name()
 
-		// Ignore default dirs
+		// Ignore default dirs and files
+		if defaultIgnores[base] {
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
 		if info.IsDir() {
-			if defaultIgnores[base] || strings.HasPrefix(base, ".") && base != "." {
+			if strings.HasPrefix(base, ".") && base != ".github" && base != "." {
 				return filepath.SkipDir
 			}
 			for _, rule := range gitignoreRules {
@@ -369,9 +383,9 @@ func classifyLayer(relPath string) ArchitectureLayer {
 		strings.Contains(p, "/routes/") || strings.Contains(p, "/route/") ||
 		strings.Contains(p, "/handlers/") || strings.Contains(p, "/handler/") ||
 		strings.Contains(p, "/endpoints/") || strings.Contains(p, "/endpoint/") ||
-		strings.Contains(p, "/api/") || strings.Contains(p, "/resolvers/") || strings.Contains(p, "/resolver/") ||
+		strings.Contains(p, "/api/") || strings.Contains(p, "/cli") || strings.Contains(p, "/resolvers/") || strings.Contains(p, "/resolver/") ||
 		strings.Contains(base, "controller.") || strings.Contains(base, "resolver.") ||
-		base == "main.go" || base == "main.py" || base == "main.ts" || base == "cli.ts" || base == "cli.js" {
+		base == "main.go" || base == "main.py" || base == "main.ts" || base == "cli.ts" || base == "cli.js" || base == "index.ts" || base == "index.js" {
 		return LayerAPI
 	}
 
