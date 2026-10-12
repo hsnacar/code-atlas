@@ -49,6 +49,20 @@ The agent typically:
 
 ---
 
+## 🏆 Real-World Benchmarks (Famous Open-Source Repos)
+
+Real-world performance tested on iconic open-source repositories:
+
+| Repository | Primary Stack | Files / Lines | Original Tokens | Atlas Map Tokens | Token Savings | Analysis Time |
+| :--- | :--- | :--- | :--- | :--- | :---: | :---: |
+| **[Express.js](https://github.com/expressjs/express)** | JavaScript | 149 files / 22,217 lines | ~141,687 | **~4,047** | **97.1%** 🚀 | **204 ms** |
+| **[Gin Web Framework](https://github.com/gin-gonic/gin)** | Go | 110 files / 25,141 lines | ~179,538 | **~7,324** | **95.9%** 🚀 | **139 ms** |
+| **[Flask](https://github.com/pallets/flask)** | Python | 101 files / 19,117 lines | ~151,866 | **~5,539** | **96.4%** 🚀 | **75 ms** |
+| **[Zustand](https://github.com/pmndrs/zustand)** | TypeScript | 70 files / 10,751 lines | ~79,197 | **~2,834** | **96.4%** 🚀 | **139 ms** |
+| **[FastAPI](https://github.com/fastapi/fastapi)** | Python | 1,219 files / 127,925 lines | ~1,116,339 | **~70,856** | **93.7%** 🚀 | **191 ms** |
+
+> *Tested on an Apple Silicon machine. All benchmarks executed with zero warmup and default settings.*
+
 ## 🚀 Quickstart
 
 Run directly in any project root with `npx` (no install required):
