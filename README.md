@@ -238,6 +238,25 @@ console.log(`Compression: ${(map.compressionRatio * 100).toFixed(1)}% reduction!
 
 ---
 
+## ⚡ Standalone Native Binary (No Node.js Required)
+
+Don't want to install Node.js or run npm? We provide a zero-dependency standalone Go CLI in [`extras/go-cli`](./extras/go-cli):
+
+- **Zero dependencies**: Built 100% on the Go standard library.
+- **Single binary**: Fast static executable (~3MB) for macOS, Linux, and Windows.
+- **Cross-platform**: Build in seconds with `go build` or use `./build.sh`.
+
+```bash
+# Compile and run anywhere:
+cd extras/go-cli
+go build -o code-atlas main.go
+./code-atlas /path/to/any/repo
+```
+
+See the [Go CLI Documentation](./extras/go-cli/README.md) for full options.
+
+---
+
 ## 🤝 Contributing
 
 Contributions, feedback, and parser extensions (Rust, C#, PHP, Ruby, etc.) are warmly welcome!  
