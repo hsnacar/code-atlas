@@ -22,12 +22,12 @@ The agent typically:
 
 ---
 
-## ⚡ The Solution: `code-atlas`
+## ⚡ The Solution: `ai-code-atlas`
 
-`code-atlas` crawls your repository, parses the AST, and builds an ultra-compact **Architectural Map (`AGENT_MAP.md`)** in milliseconds:
+`ai-code-atlas` crawls your repository, parses the AST, and builds an ultra-compact **Architectural Map (`AGENT_MAP.md`)** in milliseconds:
 
 - ✂️ **AST Signatures Without Bloat:** Strips out function and class bodies (`{ ... }`), preserving only export names, parameter types, return signatures, interfaces, and struct definitions.
-- 🎯 **Task Focus Pinpointing:** Run `npx code-atlas --focus "coupon discount"` to instantly highlight the exact 2 or 3 target files the agent needs to touch.
+- 🎯 **Task Focus Pinpointing:** Run `npx ai-code-atlas --focus "coupon discount"` to instantly highlight the exact 2 or 3 target files the agent needs to touch.
 - 🏗️ **Architectural Layer Tagging:** Automatically categorizes files into `[API & Entrypoints]`, `[Services & Business Logic]`, `[Data & Models]`, `[Utils]`, and `[Config]`.
 - 📊 **Mermaid Flowchart Generation:** Run with `--diagram` to generate visual architecture flowcharts.
 - 🎯 **Token Budget Capping:** Run with `--budget 10000` or `--compact` for massive monorepos to guarantee it fits your LLM context window.
@@ -36,9 +36,9 @@ The agent typically:
 
 ---
 
-## 📊 How Does `code-atlas` Compare?
+## 📊 How Does `ai-code-atlas` Compare?
 
-| Feature | `code-atlas` 🧭 | Repomix / Packagers | Raw `grep` / `find` | Vector RAG Embeddings |
+| Feature | `ai-code-atlas` 🧭 | Repomix / Packagers | Raw `grep` / `find` | Vector RAG Embeddings |
 | :--- | :---: | :---: | :---: | :---: |
 | **Token Efficiency** | **90–95% Reduction** | 0% (Copies all code bodies) | N/A (unstructured) | Medium |
 | **AST Symbol Extraction** | ✅ (Functions, Classes, Structs) | ❌ Raw text only | ❌ Line hits only | ❌ Chunk fragments |

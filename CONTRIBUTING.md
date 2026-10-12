@@ -1,6 +1,6 @@
-# 🤝 Contributing to Code Atlas
+# 🤝 Contributing to Code Atlas (`ai-code-atlas`)
 
-Thank you for your interest in contributing to **Code Atlas**! 
+Thank you for your interest in contributing to **Code Atlas** (`ai-code-atlas`)! 
 
 Code Atlas is an open-source tool designed to help developers and AI agents navigate codebases with surgical precision while saving 90–95%+ on token costs.
 
