@@ -107,18 +107,26 @@ export function generateAtlas(options: AtlasOptions = {}): { map: AtlasMap; outp
     allFiles
   };
 
-  // Generate output text to measure compression
-  const markdownText = formatMarkdownMap(rawMap, focusMatches, options.focus);
-  const mapTokens = Math.ceil(Buffer.byteLength(markdownText, 'utf8') / 4);
+  const formatOpts = {
+    focusMatches,
+    focusQuery: options.focus,
+    compact: options.compact,
+    diagram: options.diagram,
+    budget: options.budget
+  };
+
+  // Initial pass to measure output length and token ratio
+  const previewText = formatMarkdownMap(rawMap, formatOpts);
+  const mapTokens = Math.ceil(Buffer.byteLength(previewText, 'utf8') / 4);
   const compressionRatio = originalTokens > 0 ? Math.max(0, 1 - mapTokens / originalTokens) : 0;
 
   rawMap.mapTokens = mapTokens;
   rawMap.compressionRatio = compressionRatio;
 
-  // Final formatted output
+  // Final formatted output with accurate metrics in header
   const finalOutput = options.json
     ? formatJsonMap(rawMap, focusMatches)
-    : formatMarkdownMap(rawMap, focusMatches, options.focus);
+    : formatMarkdownMap(rawMap, formatOpts);
 
   return {
     map: rawMap,

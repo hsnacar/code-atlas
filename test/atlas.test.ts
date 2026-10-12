@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import path from 'node:path';
 import { generateAtlas } from '../src/atlas.js';
 import { scanRepository } from '../src/scanner.js';
 import { classifyFileLayer } from '../src/classifier.js';
 import { filterByFocus } from '../src/focus.js';
 import { parseFileContent } from '../src/parsers/index.js';
+import { formatMarkdownMap } from '../src/formatter.js';
 
-describe('Code Atlas Unit Tests', () => {
+describe('Code Atlas Unit & Edge Case Tests', () => {
   it('should scan current directory ignoring node_modules and dist', () => {
     const files = scanRepository({ cwd: process.cwd() });
     expect(files.length).toBeGreaterThan(0);
@@ -15,11 +15,16 @@ describe('Code Atlas Unit Tests', () => {
     expect(files.some(f => f === 'src/atlas.ts')).toBe(true);
   });
 
-  it('should accurately classify architecture layers', () => {
+  it('should accurately classify architecture layers across naming conventions', () => {
     expect(classifyFileLayer('src/controllers/user.controller.ts')).toBe('api');
+    expect(classifyFileLayer('api/v1/auth.go')).toBe('api');
+    expect(classifyFileLayer('src/resolvers/user.resolver.ts')).toBe('api');
     expect(classifyFileLayer('src/services/payment.service.ts')).toBe('service');
     expect(classifyFileLayer('src/models/user.model.ts')).toBe('data');
+    expect(classifyFileLayer('models/Category.go')).toBe('data');
+    expect(classifyFileLayer('src/entity/Customer.java')).toBe('data');
     expect(classifyFileLayer('src/config/database.ts')).toBe('config');
+    expect(classifyFileLayer('src/security/jwt.go')).toBe('config');
     expect(classifyFileLayer('src/utils/format.ts')).toBe('util');
     expect(classifyFileLayer('src/tests/user.test.ts')).toBe('test');
     expect(classifyFileLayer('src/user_test.go')).toBe('test');
@@ -42,6 +47,27 @@ describe('Code Atlas Unit Tests', () => {
     expect(parsed.symbols.some(s => s.name === 'User' && s.kind === 'interface')).toBe(true);
     expect(parsed.symbols.some(s => s.name === 'UserService' && s.kind === 'class')).toBe(true);
     expect(parsed.symbols.some(s => s.name === 'calculateTotal' && s.kind === 'function')).toBe(true);
+  });
+
+  it('should parse CommonJS exports and require calls correctly', () => {
+    const code = `
+      const bcrypt = require('bcrypt');
+      const { Router } = require('express');
+
+      function login(req, res) {}
+      function register(req, res) {}
+
+      module.exports = {
+        login,
+        register
+      };
+    `;
+
+    const parsed = parseFileContent(code, 'auth.js');
+    expect(parsed.dependencies).toContain('bcrypt');
+    expect(parsed.dependencies).toContain('express');
+    expect(parsed.symbols.some(s => s.name === 'login')).toBe(true);
+    expect(parsed.symbols.some(s => s.name === 'register')).toBe(true);
   });
 
   it('should parse Python classes, functions, and imports', () => {
@@ -89,7 +115,29 @@ describe('Code Atlas Unit Tests', () => {
     expect(parsed.symbols.some(s => s.name === 'HandleRequest' && s.kind === 'function')).toBe(true);
   });
 
-  it('should pinpoint target files with focus query', () => {
+  it('should parse Java classes, interfaces, and methods', () => {
+    const code = `
+      package com.example.service;
+      import java.util.List;
+      import org.springframework.stereotype.Service;
+
+      public interface PaymentGateway {
+        boolean processPayment(double amount);
+      }
+
+      public class OrderService {
+        public void cancelOrder(String id) {}
+      }
+    `;
+
+    const parsed = parseFileContent(code, 'OrderService.java');
+    expect(parsed.dependencies).toContain('java.util.List');
+    expect(parsed.dependencies).toContain('org.springframework.stereotype.Service');
+    expect(parsed.symbols.some(s => s.name === 'PaymentGateway' && s.kind === 'interface')).toBe(true);
+    expect(parsed.symbols.some(s => s.name === 'OrderService' && s.kind === 'class')).toBe(true);
+  });
+
+  it('should pinpoint target files with focus query and rank properly', () => {
     const files = [
       {
         path: 'src/services/discount.service.ts',
@@ -127,5 +175,31 @@ describe('Code Atlas Unit Tests', () => {
     expect(map.compressionRatio).toBeGreaterThan(0.7); // At least 70% compression
     expect(output).toContain('# 🧭 Code Atlas: Architectural Map for AI Agents');
     expect(output).toContain('token reduction');
+  });
+
+  it('should support compact mode rendering', () => {
+    const { output } = generateAtlas({ cwd: process.cwd(), compact: true });
+    expect(output).toContain('Mode: Compact High-Density');
+    expect(output).toMatch(/\(\d+L\)/); // compact line notation like (80L)
+  });
+
+  it('should support Mermaid architectural flowchart rendering', () => {
+    const { output } = generateAtlas({ cwd: process.cwd(), diagram: true });
+    expect(output).toContain('## 📊 Architecture Flowchart');
+    expect(output).toContain('```mermaid');
+    expect(output).toContain('graph TD');
+  });
+
+  it('should respect token budget cap', () => {
+    const { output } = generateAtlas({ cwd: process.cwd(), budget: 200 });
+    expect(output).toContain('Budget Cap: ~200 tokens');
+    expect(output).toContain('omitted to respect token budget');
+  });
+
+  it('should handle empty or malformed files gracefully without throwing', () => {
+    expect(() => parseFileContent('', 'empty.ts')).not.toThrow();
+    expect(() => parseFileContent('const a = ;;; invalid syntax', 'broken.ts')).not.toThrow();
+    expect(() => parseFileContent('', 'empty.py')).not.toThrow();
+    expect(() => parseFileContent('', 'empty.go')).not.toThrow();
   });
 });

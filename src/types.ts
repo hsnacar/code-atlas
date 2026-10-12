@@ -49,4 +49,7 @@ export interface AtlasOptions {
   maxFiles?: number;
   verbose?: boolean;
   stdout?: boolean;
+  compact?: boolean;       // High-density single-line file rendering
+  diagram?: boolean;       // Include Mermaid architectural diagram
+  budget?: number;         // Cap maximum tokens for output map
 }

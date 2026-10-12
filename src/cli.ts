@@ -13,6 +13,9 @@ program
   .argument('[directory]', 'Target repository directory (defaults to current dir)', '.')
   .option('-o, --output <file>', 'Output map file path (default: AGENT_MAP.md)')
   .option('-f, --focus <task>', 'Task-focused query to pinpoint relevant files (e.g. "auth login token")')
+  .option('-c, --compact', 'Render files in a compact high-density single-line format')
+  .option('-d, --diagram', 'Include a Mermaid architectural flowchart in the map')
+  .option('-b, --budget <tokens>', 'Cap output to a maximum estimated token budget (e.g. 8000)')
   .option('--json', 'Output map in structured JSON format')
   .option('--stdout', 'Print map to stdout instead of writing to a file')
   .option('-e, --exclude <patterns...>', 'Additional glob patterns or folders to exclude')
@@ -28,6 +31,9 @@ program
       output: opts.output,
       json: opts.json,
       focus: opts.focus,
+      compact: opts.compact,
+      diagram: opts.diagram,
+      budget: opts.budget ? parseInt(opts.budget, 10) : undefined,
       exclude: opts.exclude,
       maxFiles: parseInt(opts.maxFiles, 10),
       stdout: opts.stdout
@@ -44,6 +50,7 @@ program
     const defaultFilename = opts.json ? 'agent-map.json' : 'AGENT_MAP.md';
     const outputPath = path.resolve(cwd, opts.output || defaultFilename);
 
+    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
     fs.writeFileSync(outputPath, result.output, 'utf8');
 
     // Display beautiful summary table in terminal
