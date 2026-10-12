@@ -9,16 +9,19 @@ export interface ParsedCodeFile {
 
 export function parseTypeScript(content: string, filename: string): ParsedCodeFile {
   const isJsx = filename.endsWith('.tsx') || filename.endsWith('.jsx');
+  const isJs = filename.endsWith('.js') || filename.endsWith('.jsx') || filename.endsWith('.mjs') || filename.endsWith('.cjs');
+
   const sourceFile = ts.createSourceFile(
     filename,
     content,
     ts.ScriptTarget.Latest,
     true,
-    isJsx ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+    isJsx ? ts.ScriptKind.TSX : (isJs ? ts.ScriptKind.JS : ts.ScriptKind.TS)
   );
 
   const symbols: SymbolSignature[] = [];
   const dependencies: Set<string> = new Set();
+  const commonJsExports: Set<string> = new Set();
   let fileDescription: string | undefined;
 
   // Extract leading file comment if present
@@ -42,45 +45,73 @@ export function parseTypeScript(content: string, filename: string): ParsedCodeFi
     return !!modifiers?.some(m => m.kind === ts.SyntaxKind.ExportKeyword);
   }
 
+  // Pre-scan for CommonJS module.exports = { ... } or exports.foo = ...
+  ts.forEachChild(sourceFile, node => {
+    if (ts.isExpressionStatement(node) && ts.isBinaryExpression(node.expression)) {
+      const bin = node.expression;
+      if (bin.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
+        const left = bin.left.getText(sourceFile);
+        if (left === 'module.exports' && ts.isObjectLiteralExpression(bin.right)) {
+          bin.right.properties.forEach(prop => {
+            if (prop.name) commonJsExports.add(prop.name.getText(sourceFile));
+          });
+        } else if (left.startsWith('exports.')) {
+          commonJsExports.add(left.replace('exports.', ''));
+        }
+      }
+    }
+  });
+
   function visit(node: ts.Node) {
-    // 1. Imports
+    // 1. ESM Imports
     if (ts.isImportDeclaration(node)) {
       if (ts.isStringLiteral(node.moduleSpecifier)) {
         dependencies.add(node.moduleSpecifier.text);
       }
     }
 
-    // 2. Export declarations (re-exports)
+    // 2. CommonJS require('...')
+    if (ts.isCallExpression(node)) {
+      if (ts.isIdentifier(node.expression) && node.expression.text === 'require' && node.arguments.length > 0) {
+        const firstArg = node.arguments[0];
+        if (ts.isStringLiteral(firstArg)) {
+          dependencies.add(firstArg.text);
+        }
+      }
+    }
+
+    // 3. Export declarations (re-exports)
     if (ts.isExportDeclaration(node) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
       dependencies.add(node.moduleSpecifier.text);
     }
 
-    // 3. Functions
+    // 4. Functions
     if (ts.isFunctionDeclaration(node) && node.name) {
-      const isExported = isExportedNode(node);
+      const name = node.name.text;
+      const isExported = isExportedNode(node) || commonJsExports.has(name) || (isJs && node.parent === sourceFile);
       const params = node.parameters.map(p => formatParam(p)).join(', ');
-      const retType = node.type ? node.type.getText(sourceFile) : 'void';
+      const retType = node.type ? `: ${node.type.getText(sourceFile)}` : '';
       symbols.push({
-        name: node.name.text,
+        name,
         kind: 'function',
-        signature: `${node.name.text}(${params}): ${retType}`,
+        signature: `${name}(${params})${retType}`,
         doc: getDocComment(node),
         isExported
       });
     }
 
-    // 4. Classes
+    // 5. Classes
     if (ts.isClassDeclaration(node) && node.name) {
-      const isExported = isExportedNode(node);
       const className = node.name.text;
+      const isExported = isExportedNode(node) || commonJsExports.has(className) || (isJs && node.parent === sourceFile);
       const methods: string[] = [];
 
       node.members.forEach(member => {
         if (ts.isMethodDeclaration(member) && member.name) {
           const name = member.name.getText(sourceFile);
           const params = member.parameters.map(p => formatParam(p)).join(', ');
-          const retType = member.type ? member.type.getText(sourceFile) : '';
-          methods.push(`${name}(${params})${retType ? `: ${retType}` : ''}`);
+          const retType = member.type ? `: ${member.type.getText(sourceFile)}` : '';
+          methods.push(`${name}(${params})${retType}`);
         } else if (ts.isConstructorDeclaration(member)) {
           const params = member.parameters.map(p => formatParam(p)).join(', ');
           methods.push(`constructor(${params})`);
@@ -100,7 +131,7 @@ export function parseTypeScript(content: string, filename: string): ParsedCodeFi
       });
     }
 
-    // 5. Interfaces
+    // 6. Interfaces
     if (ts.isInterfaceDeclaration(node)) {
       const isExported = isExportedNode(node);
       const members = node.members.map(m => {
@@ -117,7 +148,7 @@ export function parseTypeScript(content: string, filename: string): ParsedCodeFi
       });
     }
 
-    // 6. Type Aliases
+    // 7. Type Aliases
     if (ts.isTypeAliasDeclaration(node)) {
       const isExported = isExportedNode(node);
       symbols.push({
@@ -129,7 +160,7 @@ export function parseTypeScript(content: string, filename: string): ParsedCodeFi
       });
     }
 
-    // 7. Enums
+    // 8. Enums
     if (ts.isEnumDeclaration(node)) {
       const isExported = isExportedNode(node);
       const members = node.members.map(m => m.name.getText(sourceFile));
@@ -142,24 +173,28 @@ export function parseTypeScript(content: string, filename: string): ParsedCodeFi
       });
     }
 
-    // 8. Exported Arrow Functions / Consts
+    // 9. Arrow Functions / Top-level Const Functions
     if (ts.isVariableStatement(node)) {
-      const isExported = isExportedNode(node);
-      if (isExported) {
-        node.declarationList.declarations.forEach(decl => {
-          if (decl.name && ts.isIdentifier(decl.name)) {
-            const name = decl.name.text;
+      const isTopLevel = node.parent === sourceFile;
+      const isExplicitExport = isExportedNode(node);
+
+      node.declarationList.declarations.forEach(decl => {
+        if (decl.name && ts.isIdentifier(decl.name)) {
+          const name = decl.name.text;
+          const isExported = isExplicitExport || commonJsExports.has(name) || (isJs && isTopLevel);
+
+          if (isExported) {
             if (decl.initializer && (ts.isArrowFunction(decl.initializer) || ts.isFunctionExpression(decl.initializer))) {
               const params = decl.initializer.parameters.map(p => formatParam(p)).join(', ');
-              const ret = decl.initializer.type ? decl.initializer.type.getText(sourceFile) : '';
+              const ret = decl.initializer.type ? `: ${decl.initializer.type.getText(sourceFile)}` : '';
               symbols.push({
                 name,
                 kind: 'function',
-                signature: `${name}(${params})${ret ? `: ${ret}` : ''}`,
+                signature: `${name}(${params})${ret}`,
                 doc: getDocComment(node),
                 isExported: true
               });
-            } else {
+            } else if (isExplicitExport || commonJsExports.has(name)) {
               symbols.push({
                 name,
                 kind: 'const',
@@ -169,8 +204,8 @@ export function parseTypeScript(content: string, filename: string): ParsedCodeFi
               });
             }
           }
-        });
-      }
+        }
+      });
     }
 
     ts.forEachChild(node, visit);
