@@ -112,8 +112,10 @@ export function scanRepository(options: ScanOptions): string[] {
 
       if (!relativePath || relativePath === '') continue;
 
+      const normalizedRel = relativePath.replace(/\\/g, '/');
+
       // Check ignore
-      const checkPath = entry.isDirectory() ? `${relativePath}/` : relativePath;
+      const checkPath = entry.isDirectory() ? `${normalizedRel}/` : normalizedRel;
       if (ig.ignores(checkPath)) {
         continue;
       }
@@ -123,7 +125,7 @@ export function scanRepository(options: ScanOptions): string[] {
       } else if (entry.isFile()) {
         const ext = path.extname(entry.name).toLowerCase();
         if (CODE_EXTENSIONS.has(ext)) {
-          collectedFiles.push(relativePath);
+          collectedFiles.push(normalizedRel);
         }
       }
     }

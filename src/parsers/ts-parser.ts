@@ -220,11 +220,15 @@ export function parseTypeScript(content: string, filename: string): ParsedCodeFi
   };
 }
 
-function formatParam(p: ts.ParameterDeclaration): string {
-  const name = p.name.getText();
-  const type = p.type ? `: ${p.type.getText()}` : '';
-  const optional = p.questionToken ? '?' : '';
-  return `${name}${optional}${type}`;
+function formatParam(p: ts.ParameterDeclaration, sourceFile?: ts.SourceFile): string {
+  try {
+    const name = p.name ? (sourceFile ? p.name.getText(sourceFile) : p.name.getText()) : '_';
+    const type = p.type ? `: ${sourceFile ? p.type.getText(sourceFile) : p.type.getText()}` : '';
+    const optional = p.questionToken ? '?' : '';
+    return `${name}${optional}${type}`;
+  } catch {
+    return '_';
+  }
 }
 
 function cleanComment(comment: string): string {
