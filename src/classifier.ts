@@ -2,7 +2,8 @@ import path from 'node:path';
 import { ArchitectureLayer } from './types.js';
 
 export function classifyFileLayer(filePath: string): ArchitectureLayer {
-  const normalized = filePath.toLowerCase().replace(/\\/g, '/');
+  const raw = filePath.toLowerCase().replace(/\\/g, '/');
+  const normalized = raw.startsWith('/') ? raw : '/' + raw;
   const basename = path.basename(normalized);
   const ext = path.extname(normalized);
 
