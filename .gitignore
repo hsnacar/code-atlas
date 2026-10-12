@@ -4,5 +4,4 @@ dist/
 .DS_Store
 coverage/
 AGENT_MAP.md
-extras/go-cli/bin/
 extras/go-cli/code-atlas

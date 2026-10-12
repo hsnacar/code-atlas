@@ -80,11 +80,19 @@ The output will include a `## 🎯 Task Focus Targets` section ranking files wit
 
 ---
 
-## 📦 Cross-Platform Binaries
+## 📦 Precompiled Cross-Platform Binaries
 
-Run `./build.sh` to generate precompiled binaries in `./bin/`:
-- `code-atlas-darwin-arm64` (Apple Silicon Mac)
-- `code-atlas-darwin-amd64` (Intel Mac)
-- `code-atlas-linux-amd64` (Linux x86_64 / Docker / CI)
-- `code-atlas-linux-arm64` (Linux ARM64)
-- `code-atlas-windows-amd64.exe` (Windows x64)
+Ready-to-use binaries are included in [`./bin/`](./bin/):
+
+| Platform | Binary | Size |
+| :--- | :--- | :--- |
+| **macOS (Apple Silicon M1/M2/M3/M4)** | [`bin/code-atlas-darwin-arm64`](./bin/code-atlas-darwin-arm64) | ~2.8 MB |
+| **macOS (Intel x86_64)** | [`bin/code-atlas-darwin-amd64`](./bin/code-atlas-darwin-amd64) | ~2.9 MB |
+| **Linux (x86_64 / Docker / Ubuntu)** | [`bin/code-atlas-linux-amd64`](./bin/code-atlas-linux-amd64) | ~2.9 MB |
+| **Linux (ARM64 / AWS Graviton)** | [`bin/code-atlas-linux-arm64`](./bin/code-atlas-linux-arm64) | ~2.8 MB |
+| **Windows (x64)** | [`bin/code-atlas-windows-amd64.exe`](./bin/code-atlas-windows-amd64.exe) | ~3.1 MB |
+
+To recompile them yourself at any time, simply run:
+```bash
+./build.sh
+```
