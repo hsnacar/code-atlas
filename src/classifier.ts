@@ -22,16 +22,22 @@ export function classifyFileLayer(filePath: string): ArchitectureLayer {
     return 'test';
   }
 
-  // 2. API / Entrypoints / Routes / Controllers / CLI
+  // 2. API / Entrypoints / Routes / Controllers / Resolvers / CLI
   if (
     normalized.includes('/controllers/') ||
+    normalized.includes('/controller/') ||
     normalized.includes('/routes/') ||
+    normalized.includes('/route/') ||
     normalized.includes('/handlers/') ||
+    normalized.includes('/handler/') ||
     normalized.includes('/endpoints/') ||
+    normalized.includes('/endpoint/') ||
     normalized.includes('/api/') ||
     normalized.includes('/cli') ||
     normalized.includes('/resolvers/') ||
+    normalized.includes('/resolver/') ||
     basename.includes('controller.') ||
+    basename.includes('resolver.') ||
     basename.includes('route.') ||
     basename.includes('handler.') ||
     basename.includes('endpoint.') ||
@@ -49,6 +55,7 @@ export function classifyFileLayer(filePath: string): ArchitectureLayer {
   // 3. Business Logic / Services / UseCases / Processors
   if (
     normalized.includes('/services/') ||
+    normalized.includes('/service/') ||
     normalized.includes('/usecases/') ||
     normalized.includes('/use-cases/') ||
     normalized.includes('/logic/') ||
@@ -66,9 +73,13 @@ export function classifyFileLayer(filePath: string): ArchitectureLayer {
   // 4. Data / Models / Schemas / Entities / Repositories
   if (
     normalized.includes('/models/') ||
+    normalized.includes('/model/') ||
     normalized.includes('/entities/') ||
+    normalized.includes('/entity/') ||
     normalized.includes('/schemas/') ||
+    normalized.includes('/schema/') ||
     normalized.includes('/repositories/') ||
+    normalized.includes('/repository/') ||
     normalized.includes('/repos/') ||
     normalized.includes('/migrations/') ||
     normalized.includes('/dto/') ||
@@ -85,17 +96,19 @@ export function classifyFileLayer(filePath: string): ArchitectureLayer {
     return 'data';
   }
 
-  // 5. Config / Setup / Infrastructure / Middlewares
+  // 5. Config / Setup / Infrastructure / Middlewares / Security
   if (
     normalized.includes('/config/') ||
     normalized.includes('/configs/') ||
     normalized.includes('/middlewares/') ||
     normalized.includes('/middleware/') ||
+    normalized.includes('/security/') ||
     normalized.includes('/infra/') ||
     normalized.includes('/infrastructure/') ||
     basename.includes('config.') ||
     basename.includes('setup.') ||
     basename.includes('middleware.') ||
+    basename.includes('security.') ||
     basename.endsWith('.env') ||
     basename.endsWith('.config.js') ||
     basename.endsWith('.config.ts')
@@ -103,7 +116,7 @@ export function classifyFileLayer(filePath: string): ArchitectureLayer {
     return 'config';
   }
 
-  // 6. Utilities / Helpers
+  // 6. Utilities / Helpers / Exceptions
   if (
     normalized.includes('/utils/') ||
     normalized.includes('/util/') ||
@@ -111,6 +124,8 @@ export function classifyFileLayer(filePath: string): ArchitectureLayer {
     normalized.includes('/lib/') ||
     normalized.includes('/common/') ||
     normalized.includes('/shared/') ||
+    normalized.includes('/exceptions/') ||
+    normalized.includes('/exception/') ||
     basename.includes('util.') ||
     basename.includes('helper.') ||
     basename.includes('common.')
