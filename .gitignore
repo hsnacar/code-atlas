@@ -5,3 +5,4 @@ dist/
 coverage/
 AGENT_MAP.md
 extras/go-cli/code-atlas
+bugs/
