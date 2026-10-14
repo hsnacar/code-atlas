@@ -80,8 +80,10 @@ export function generateAtlas(options: AtlasOptions = {}): { map: AtlasMap; outp
       else if (ext === '.py') topLang = 'Python';
       else if (ext === '.java') topLang = 'Java';
       else if (ext === '.rs') topLang = 'Rust';
-      else if (ext === '.ts' || ext === '.tsx') topLang = 'TypeScript';
-      else if (ext === '.js' || ext === '.jsx') topLang = 'JavaScript';
+      else if (ext === '.tsx') topLang = 'React (TSX)';
+      else if (ext === '.jsx') topLang = 'React (JSX)';
+      else if (ext === '.ts') topLang = 'TypeScript';
+      else if (ext === '.js') topLang = 'JavaScript';
     }
   }
 

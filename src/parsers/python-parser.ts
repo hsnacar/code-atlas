@@ -51,6 +51,7 @@ export function parsePython(content: string): ParsedCodeFile {
         signature: `def ${name}(${params})${ret}`,
         isExported: !name.startsWith('_')
       });
+      continue;
     }
   }
 

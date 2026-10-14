@@ -19,7 +19,7 @@ export function parseJava(content: string): ParsedCodeFile {
     // Class / Record / Interface / Enum
     const typeMatch = line.match(/(?:public|protected)?\s*(?:final|abstract|sealed)?\s*(class|record|interface|enum)\s+([A-Za-z0-9_]+)(?:<[^>]+>)?(?:\s+(?:extends|implements)\s+[^{]+)?/);
     if (typeMatch) {
-      const kind = typeMatch[1] as 'class' | 'interface' | 'enum';
+      const kind = typeMatch[1] as 'class' | 'interface' | 'enum' | 'record';
       const name = typeMatch[2];
       symbols.push({
         name,

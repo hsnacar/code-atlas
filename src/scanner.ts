@@ -105,7 +105,7 @@ export function scanRepository(options: ScanOptions): string[] {
     }
 
     for (const entry of entries) {
-      if (collectedFiles.length >= maxFiles) break;
+      if (collectedFiles.length >= maxFiles) return;
 
       const fullPath = path.join(currentDir, entry.name);
       const relativePath = path.relative(rootDir, fullPath);
@@ -122,10 +122,12 @@ export function scanRepository(options: ScanOptions): string[] {
 
       if (entry.isDirectory()) {
         traverse(fullPath);
+        if (collectedFiles.length >= maxFiles) return;
       } else if (entry.isFile()) {
         const ext = path.extname(entry.name).toLowerCase();
         if (CODE_EXTENSIONS.has(ext)) {
           collectedFiles.push(normalizedRel);
+          if (collectedFiles.length >= maxFiles) return;
         }
       }
     }

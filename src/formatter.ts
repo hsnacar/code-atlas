@@ -136,7 +136,7 @@ export function formatMarkdownMap(
     }
     lines.push('');
 
-    if (opts.budget && budgetReached && layer === 'other') {
+    if (opts.budget && budgetReached) {
       break;
     }
   }

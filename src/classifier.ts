@@ -33,7 +33,10 @@ export function classifyFileLayer(filePath: string): ArchitectureLayer {
     normalized.includes('/endpoints/') ||
     normalized.includes('/endpoint/') ||
     normalized.includes('/api/') ||
-    normalized.includes('/cli') ||
+    normalized.includes('/cli/') ||
+    normalized.endsWith('/cli') ||
+    normalized.endsWith('/cli.ts') ||
+    normalized.endsWith('/cli.js') ||
     normalized.includes('/resolvers/') ||
     normalized.includes('/resolver/') ||
     basename.includes('controller.') ||
@@ -43,8 +46,6 @@ export function classifyFileLayer(filePath: string): ArchitectureLayer {
     basename.includes('endpoint.') ||
     basename === 'cli.ts' ||
     basename === 'cli.js' ||
-    basename === 'index.ts' ||
-    basename === 'index.js' ||
     basename === 'main.go' ||
     basename === 'main.py' ||
     basename === 'main.ts'

@@ -89,7 +89,7 @@ export function parseTypeScript(content: string, filename: string): ParsedCodeFi
     if (ts.isFunctionDeclaration(node) && node.name) {
       const name = node.name.text;
       const isExported = isExportedNode(node) || commonJsExports.has(name) || (isJs && node.parent === sourceFile);
-      const params = node.parameters.map(p => formatParam(p)).join(', ');
+      const params = node.parameters.map(p => formatParam(p, sourceFile)).join(', ');
       const retType = node.type ? `: ${node.type.getText(sourceFile)}` : '';
       symbols.push({
         name,
@@ -109,11 +109,11 @@ export function parseTypeScript(content: string, filename: string): ParsedCodeFi
       node.members.forEach(member => {
         if (ts.isMethodDeclaration(member) && member.name) {
           const name = member.name.getText(sourceFile);
-          const params = member.parameters.map(p => formatParam(p)).join(', ');
+          const params = member.parameters.map(p => formatParam(p, sourceFile)).join(', ');
           const retType = member.type ? `: ${member.type.getText(sourceFile)}` : '';
           methods.push(`${name}(${params})${retType}`);
         } else if (ts.isConstructorDeclaration(member)) {
-          const params = member.parameters.map(p => formatParam(p)).join(', ');
+          const params = member.parameters.map(p => formatParam(p, sourceFile)).join(', ');
           methods.push(`constructor(${params})`);
         }
       });
@@ -185,7 +185,7 @@ export function parseTypeScript(content: string, filename: string): ParsedCodeFi
 
           if (isExported) {
             if (decl.initializer && (ts.isArrowFunction(decl.initializer) || ts.isFunctionExpression(decl.initializer))) {
-              const params = decl.initializer.parameters.map(p => formatParam(p)).join(', ');
+              const params = decl.initializer.parameters.map(p => formatParam(p, sourceFile)).join(', ');
               const ret = decl.initializer.type ? `: ${decl.initializer.type.getText(sourceFile)}` : '';
               symbols.push({
                 name,

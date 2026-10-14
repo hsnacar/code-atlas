@@ -9,7 +9,7 @@ export type ArchitectureLayer =
 
 export interface SymbolSignature {
   name: string;
-  kind: 'class' | 'interface' | 'function' | 'method' | 'type' | 'struct' | 'enum' | 'const';
+  kind: 'class' | 'interface' | 'function' | 'method' | 'type' | 'struct' | 'enum' | 'const' | 'record';
   signature: string;
   doc?: string;
   isExported: boolean;

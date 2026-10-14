@@ -202,4 +202,80 @@ describe('Code Atlas Unit & Edge Case Tests', () => {
     expect(() => parseFileContent('', 'empty.py')).not.toThrow();
     expect(() => parseFileContent('', 'empty.go')).not.toThrow();
   });
+
+  it('BUG-01 & BUG-10: should not misclassify /client/ paths or generic index.ts as api layer', () => {
+    expect(classifyFileLayer('src/client/auth.ts')).not.toBe('api');
+    expect(classifyFileLayer('src/clients/http-client.ts')).not.toBe('api');
+    expect(classifyFileLayer('src/index.ts')).not.toBe('api');
+    expect(classifyFileLayer('src/cli/command.ts')).toBe('api');
+    expect(classifyFileLayer('src/api/index.ts')).toBe('api');
+  });
+
+  it('BUG-04: should parse Java record types with kind record', () => {
+    const code = `
+      package com.example.dto;
+      public record UserDTO(String name, int age) {}
+    `;
+    const parsed = parseFileContent(code, 'UserDTO.java');
+    const recordSym = parsed.symbols.find(s => s.name === 'UserDTO');
+    expect(recordSym).toBeDefined();
+    expect(recordSym?.kind).toBe('record');
+    expect(recordSym?.signature).toBe('record UserDTO');
+  });
+
+  it('BUG-05: should format TypeScript parameters with sourceFile context', () => {
+    const code = `
+      export function genericHandler<T>(item: T, count?: number): T {
+        return item;
+      }
+    `;
+    const parsed = parseFileContent(code, 'handler.ts');
+    const fnSym = parsed.symbols.find(s => s.name === 'genericHandler');
+    expect(fnSym?.signature).toContain('item: T');
+    expect(fnSym?.signature).toContain('count?: number');
+  });
+
+  it('BUG-07: should parse Go nested closures as functions', () => {
+    const code = `
+      package main
+      func Outer() {
+        inner := func(val int) bool {
+          return val > 0
+        }
+      }
+    `;
+    const parsed = parseFileContent(code, 'main.go');
+    expect(parsed.symbols.some(s => s.name === 'Outer' && s.kind === 'function')).toBe(true);
+    expect(parsed.symbols.some(s => s.name === 'inner' && s.kind === 'function')).toBe(true);
+  });
+
+  it('BUG-09: should strictly scope matchedTerms per file in focus filtering', () => {
+    const files = [
+      {
+        path: 'src/auth/login.ts',
+        extension: '.ts',
+        layer: 'api' as const,
+        lineCount: 20,
+        byteSize: 500,
+        estimatedTokens: 100,
+        symbols: [{ name: 'handleLogin', kind: 'function' as const, signature: 'handleLogin()', isExported: true }],
+        dependencies: []
+      },
+      {
+        path: 'src/models/user.ts',
+        extension: '.ts',
+        layer: 'data' as const,
+        lineCount: 30,
+        byteSize: 600,
+        estimatedTokens: 120,
+        symbols: [{ name: 'User', kind: 'class' as const, signature: 'class User', isExported: true }],
+        dependencies: []
+      }
+    ];
+
+    const results = filterByFocus(files, 'login');
+    expect(results.length).toBe(1);
+    expect(results[0].file.path).toBe('src/auth/login.ts');
+    expect(results[0].matchedTerms).toEqual(['login']);
+  });
 });

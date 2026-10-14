@@ -78,6 +78,22 @@ export function parseGo(content: string): ParsedCodeFile {
         signature: `func ${name}(${params})${ret}`,
         isExported
       });
+      continue;
+    }
+
+    // Function closure or nested func: name := func(params) returns
+    const closureMatch = line.match(/^([A-Za-z0-9_]+)\s*:=\s*func\s*\((.*?)\)(?:\s*(.*))?$/);
+    if (closureMatch) {
+      const name = closureMatch[1];
+      const params = closureMatch[2].trim();
+      const ret = closureMatch[3] ? ` ${closureMatch[3].replace(/\{.*$/, '').trim()}` : '';
+      symbols.push({
+        name,
+        kind: 'function',
+        signature: `func ${name}(${params})${ret}`,
+        isExported: false
+      });
+      continue;
     }
   }
 
